@@ -76,6 +76,28 @@
   ```
   It is best to use a GCC with version before 7, otherwise there may be compilation errors like "undeclared std::function".
 
+### LLVM 3.8 for Building isl
+  ```bash
+  cd ${BASE_DIR}
+  mkdir llvm-3.8
+  cd llvm-3.8
+  git clone https://github.com/llvm/llvm-project.git
+  cd llvm_project
+  git checkout llvmorg-3.8.1
+  cd ..
+  mkdir build install
+  cd build
+  mkdir llvm clang
+  export CC=gcc-5
+  export CXX=g++-5
+  cd llvm
+  cmake ${BASE_DIR}/llvm-3.8/llvm-project/llvm -DCMAKE_INSTALL_PREFIX="${BASE_DIR}/llvm-3.8/install/"
+  make install
+  cd ../clang
+  cmake ${BASE_DIR}/llvm-3.8/llvm-project/clang -DCMAKE_INSTALL_PREFIX="${BASE_DIR}/llvm-3.8/install/"
+  make install
+  ```
+
 ### isl Scala Bindings
   1. Make sure you have libgmp and libclang (version 3.8) (both including headers) installed on your system, as well as libtool
 
