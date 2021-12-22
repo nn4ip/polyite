@@ -67,15 +67,20 @@
   5. Create a build directory for LLVM and build it using cmake
   ```bash
   mkdir ${LLVM_ROOT}/llvm_build
+  mkdir ${LLVM_ROOT}/install
   cd ${LLVM_ROOT}/llvm_build
+  export CC=gcc-5
+  export CXX=g++-5
   cmake ${LLVM_ROOT}/llvm
   make
   ```
+  It is best to use a GCC with version before 7, otherwise there may be compilation errors like "undeclared std::function".
 
 ### isl Scala Bindings
   1. Make sure you have libgmp and libclang (version 3.8) (both including headers) installed on your system, as well as libtool
 
   2. Get and build isl
+  In the case of missing jni.h in Ubuntu, try `apt install default-jdk`.
   ```bash
   cd ${BASE_DIR}
   git clone https://github.com/stganser/isl.git
@@ -83,7 +88,7 @@
   mkdir install
   export ISL_INSTALL="${PWD}/install"
   ./autogen.sh
-  ./configure --prefix=${ISL_INSTALL} --with-jni-include=/usr/lib/jvm/default-java/include/ --with-clang=system
+  ./configure --prefix=${ISL_INSTALL} --with-jni-include=/usr/lib/jvm/default-java/include/ --with-clang-prefix="${LLVM_ROOT}/install/"
   make install
   ```
 
