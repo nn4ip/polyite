@@ -1,7 +1,8 @@
 FROM ubuntu:16.04
 
 ARG ARG_BASE_DIR=/root/polyite-project \
-    DEBIAN_FRONTEND=noninteractive
+    DEBIAN_FRONTEND=noninteractive \
+    NCORES=32
 ENV BASE_DIR=${ARG_BASE_DIR}
 ENV	LLVM_ROOT=${BASE_DIR}/llvm_root \
     ISL_INSTALL=${BASE_DIR}/isl/install \
@@ -17,7 +18,7 @@ RUN	apt update \
     && apt install -y git cmake python clang libclang-dev llvm \
     default-jdk autoconf libtool libgmp-dev libz-dev zip g++ \
     wget \
-    && git config --global url."https://hub.fastgit.org/".insteadOf "https://github.com/" \
+    && git config --global url."https://github.com.cnpmjs.org/".insteadOf "https://github.com/" \
     && mkdir ${BASE_DIR} \
     && cd $BASE_DIR \
     && git clone https://github.com/nn4ip/polyite.git \
@@ -27,17 +28,19 @@ RUN	apt update \
     && cd ${LLVM_ROOT}/llvm/tools \
     && git clone https://github.com/stganser/clang.git \
     && git clone https://github.com/stganser/polly.git \
-    && mkdir ${LLVM_ROOT}/llvm_build \
+    && mkdir ${LLVM_ROOT}/llvm_build ${LLVM_ROOT}/install \
     && cd ${LLVM_ROOT}/llvm_build \
-    && cmake ${LLVM_ROOT}/llvm \
-    && make -j32 \
+    && cmake ${LLVM_ROOT}/llvm -DCMAKE_INSTALL_PREFIX=${LLVM_ROOT}/install \
+    && make -j${NCORES} \
+    && make install \
+    && make clean \
     && cd $BASE_DIR \
     && git clone https://github.com/stganser/isl.git \
     && cd isl \
     && mkdir $ISL_INSTALL \
     && ./autogen.sh \
     && ./configure --prefix=$ISL_INSTALL --with-jni-include=/usr/lib/jvm/default-java/include/ --with-clang=system \
-    && make install -j32 \
+    && make install -j${NCORES} \
     && cd ${BASE_DIR}/isl/interface \
     && make isl-scala.jar \
     && cp -r java/gen src \
@@ -55,7 +58,7 @@ RUN	apt update \
     && cd ntl-10.5.0 && mkdir install \
     && cd src \
     && ./configure NTL_GMP_LIP=on PREFIX=${BASE_DIR}/ntl-10.5.0/install GMP_PREFIX=/usr/lib/x86_64-linux-gnu SHARED=on \
-    && make -j32 \
+    && make -j${NCORES} \
     && make install \
     && cd $BASE_DIR \
     && git clone http://repo.or.cz/barvinok.git \
@@ -64,7 +67,7 @@ RUN	apt update \
     && git submodule init && git submodule update \
     && sh autogen.sh \
     && ./configure --prefix=$BARVINOK_INSTALL --with-ntl-prefix=${BASE_DIR}/ntl-10.5.0/install --with-gmp-prefix=/usr/lib/x86_64-linux-gnu --enable-shared-barvinok \
-    && make -j32 && make install \
+    && make -j${NCORES} && make install \
     && cd $BASE_DIR \
     && git clone https://github.com/stganser/barvinok_binary.git \
     && cd barvinok_binary \
