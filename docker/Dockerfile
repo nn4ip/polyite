@@ -107,6 +107,14 @@ RUN apt install -y apt-transport-https curl sudo \
     && apt update \
     && apt install sbt
 
+# fix scala-isl-utils and chernikova source paths to satisfy sbt
+RUN cd ${ISL_UTILS_ROOT} \
+    && mkdir -p src/main/scala \
+    && mv src/isl/ src/main/scala/ \
+    && cd ${CHERNIKOVA_ROOT} \
+    && mkdir -p src/main/scala \
+    && mv src/org/ src/main/scala/
+
 # prepare polybench
 RUN cd ${BASE_DIR} \
     && tar -xzf polybench-c-4.1.tar.gz && mv polybench-c-4.1 ${POLYITE_ROOT}/ \

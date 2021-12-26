@@ -138,5 +138,6 @@ object MemAccessPattern extends Feature {
 
   override def toString() : String = getClass.getSimpleName
 
-  override def getDisplayName() : String = "memory access pattern"
+  // override def getDisplayName() : String = "memory access pattern"
+  def getDisplayName() : String = "memory access pattern"
 }
