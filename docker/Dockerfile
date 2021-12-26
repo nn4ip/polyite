@@ -55,8 +55,7 @@ RUN cd $BASE_DIR \
     && cd ${BASE_DIR}/scala-isl-utils \
     && mkdir libs \
     && cp ${BASE_DIR}/isl/interface/isl-scala.jar libs \
-    && cp ${ISL_INSTALL}/lib/libisl*so* libs \
-    && cp ${BASE_DIR}/scala-isl-utils/libs/isl-scala.jar ${POLYITE_ROOT}/libs/
+    && cp ${ISL_INSTALL}/lib/libisl*so* libs
 
 COPY libs/* ${POLYITE_ROOT}/libs/
 COPY *.tar.gz ${BASE_DIR}/
