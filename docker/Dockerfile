@@ -6,26 +6,29 @@ ARG ARG_BASE_DIR=/root/polyite-project \
     NCORES=8
 
 ENV BASE_DIR=${ARG_BASE_DIR}
+ENV POLYITE_ROOT=${BASE_DIR}/polyite
 ENV LLVM_ROOT=${BASE_DIR}/llvm_root \
     ISL_INSTALL=${BASE_DIR}/isl/install \
-    ISL_UTILS_ROOT=${BASE_DIR}/scala-isl-utils \
+    ISL_UTILS_ROOT=${POLYITE_DIR}/scala-isl-utils \
     BARVINOK_INSTALL=${BASE_DIR}/barvinok/install \
     BARVINOK_BINARY_ROOT=${BASE_DIR}/barvinok_binary \
-    CHERNIKOVA_ROOT=${BASE_DIR}/chernikova \
-    POLYITE_ROOT=${BASE_DIR}/polyite
+    CHERNIKOVA_ROOT=${POLYITE_DIR}/chernikova
 
 # for barvinok shared libs
 ENV LD_LIBRARY_PATH=${BARVINOK_INSTALL}/lib
 
+# install apt depdendencies
+# config github mirror
 RUN	apt update \
     && apt install -y git cmake python clang libclang-dev llvm \
     default-jdk autoconf libtool libgmp-dev libz-dev zip g++ wget libpapi-dev \
     && git config --global url."https://github.com.cnpmjs.org/".insteadOf "https://github.com/"
 
+# build polly with llvm 3.9.1
 RUN mkdir ${BASE_DIR} \
     && cd $BASE_DIR \
     && git clone https://github.com/nn4ip/polyite.git \
-    && mkdir ${LLVM_ROOT} libs \
+    && mkdir ${LLVM_ROOT} lib \
     && cd ${LLVM_ROOT} \
     && git clone https://github.com/stganser/llvm.git \
     && cd ${LLVM_ROOT}/llvm/tools \
@@ -38,6 +41,7 @@ RUN mkdir ${BASE_DIR} \
     && make install \
     && make clean
 
+# isl scala bindings
 RUN cd $BASE_DIR \
     && wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz \
     && tar -xzf scala-2.11.6.tgz && rm scala-2.11.6.tgz \
@@ -53,16 +57,17 @@ RUN cd $BASE_DIR \
     && cp -r java/gen src \
     && cp scala/src/isl/Conversions.scala src/isl \
     && zip -r isl-scala.jar src \
-    && cd $BASE_DIR \
+    && cd ${POLYITE_ROOT} \
     && git clone https://github.com/stganser/scala-isl-utils.git \
-    && cd ${BASE_DIR}/scala-isl-utils \
-    && mkdir libs \
-    && cp ${BASE_DIR}/isl/interface/isl-scala.jar libs \
-    && cp ${ISL_INSTALL}/lib/libisl*so* libs
+    && cd ${ISL_UTILS_ROOT} \
+    && mkdir lib \
+    && cp ${BASE_DIR}/isl/interface/isl-scala.jar lib \
+    && cp ${ISL_INSTALL}/lib/libisl*so* lib
 
-COPY libs/* ${POLYITE_ROOT}/libs/
+COPY lib/* ${POLYITE_ROOT}/lib/
 COPY *.tar.gz ${BASE_DIR}/
 
+# barvinok and chernikova
 RUN cd ${BASE_DIR} \
     && tar -xzf ntl-10.5.0.tar.gz && rm ntl-10.5.0.tar.gz \
     && cd ntl-10.5.0 && mkdir install \
@@ -82,16 +87,18 @@ RUN cd ${BASE_DIR} \
     && git clone https://github.com/stganser/barvinok_binary.git \
     && cd barvinok_binary \
     && clang -std=c99 -I${BARVINOK_INSTALL}/include -L${BARVINOK_INSTALL}/lib count_integer_points.c -lbarvinok -lisl -o count_integer_points \
-    && cd $BASE_DIR \
+    && cd ${POLYITE_ROOT} \
     && git clone https://github.com/stganser/chernikova.git
 
+# build openmpi with java interface
 RUN cd $BASE_DIR && tar -xzf openmpi-2.1.1.tar.gz && rm openmpi-2.1.1.tar.gz \
     && cd openmpi-2.1.1 && mkdir install \
     && ./configure --prefix=${BASE_DIR}/openmpi-2.1.1/install --enable-mpi-java \
     && make all -j${NCORES} \
     && make install \
-    && cp ${BASE_DIR}/openmpi-2.1.1/install/lib/mpi.jar ${POLYITE_ROOT}/libs/
+    && cp ${BASE_DIR}/openmpi-2.1.1/install/lib/mpi.jar ${POLYITE_ROOT}/lib/
 
+# install sbt
 RUN apt install -y apt-transport-https curl sudo \
     && echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list \
     && echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list \
@@ -100,6 +107,7 @@ RUN apt install -y apt-transport-https curl sudo \
     && apt update \
     && apt install sbt
 
+# prepare polybench
 RUN cd ${BASE_DIR} \
     && tar -xzf polybench-c-4.1.tar.gz && mv polybench-c-4.1 ${POLYITE_ROOT}/ \
     && rm polybench-c-4.1.tar.gz \
