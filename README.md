@@ -116,9 +116,9 @@
   git clone https://github.com/stganser/scala-isl-utils.git
   cd ${BASE_DIR}/scala-isl-utils
   export ISL_UTILS_ROOT=${BASE_DIR}/scala-isl-utils
-  mkdir libs
-  cp ${BASE_DIR}/isl/interface/isl-scala.jar libs
-  cp ${ISL_INSTALL}/lib/libisl*so* libs
+  mkdir lib
+  cp ${BASE_DIR}/isl/interface/isl-scala.jar lib
+  cp ${ISL_INSTALL}/lib/libisl*so* lib
   ```
 
 ### Barvinok Library
@@ -168,24 +168,24 @@
   2. Download required libraries
   ```bash
   cd ${POLYITE_ROOT}
-  mkdir libs
+  mkdir lib
   ```
   Now, download Scala 2.11.6 from
   [http://www.scala-lang.org/download/2.11.6.html](http://www.scala-lang.org/download/2.11.6.html)
   and copy `scala-2.11.6/lib/scala-library.jar` and
   `scala-2.11.6/lib/scala-parser-combinators_2.11-1.0.3.jar` to
-  `${POLYITE_ROOT}/libs` Further, one must download [Apache Commons Lang version
+  `${POLYITE_ROOT}/lib` Further, one must download [Apache Commons Lang version
   3.4](https://archive.apache.org/dist/commons/lang/binaries/) and [Apache
   Commons Math version 3.6.1](https://archive.apache.org/dist/commons/math/binaries/).
-  Again, copy the downloaded JAR-files to `${POLYITE_ROOT}/libs`.
+  Again, copy the downloaded JAR-files to `${POLYITE_ROOT}/lib`.
 
   Polyite relies on [OpenMPI](https://www.open-mpi.org/) for its distributed
   genetic algorithm. To be able to build Polyite, Java bindings for OpenMPI
   must be in Polyites classpath. Follow the instructions on
   [https://www.open-mpi.org/faq/?category=java#java_build](https://www.open-mpi.org/faq/?category=java#java_build) to build the bindings. Copy the file
-  `mpi.jar` to `${POLYITE_ROOT}/libs`. Polyite works with OpenMPI version 2.1.1.
+  `mpi.jar` to `${POLYITE_ROOT}/lib`. Polyite works with OpenMPI version 2.1.1.
 
-  3. Import the projects polyite and scala-isl-utils in Scala IDE/ Eclipse and build everything. Make sure that the libraries in `${POLYITE_ROOT}/libs` are in your build path, as well as `${ISL_UTILS_ROOT}/libs/isl-scala.jar`. Make sure, that your Scala compiler assumes Scala version 2.11. Make chernikova and scala-isl-utils depend on the downloaded Scala version as well and make chernikova depend on scala-isl-utils.
+  3. Import the projects polyite and scala-isl-utils in Scala IDE/ Eclipse and build everything. Make sure that the libraries in `${POLYITE_ROOT}/lib` are in your build path, as well as `${ISL_UTILS_ROOT}/lib/isl-scala.jar`. Make sure, that your Scala compiler assumes Scala version 2.11. Make chernikova and scala-isl-utils depend on the downloaded Scala version as well and make chernikova depend on scala-isl-utils.
 
   4. To use Polyite, one must execute one of the following scripts, depending on
     the desired execution mode. The scripts assume that you have OpenJDK 8
