@@ -5,14 +5,14 @@ ARG ARG_BASE_DIR=/root/polyite-project \
     DEBIAN_FRONTEND=noninteractive \
     NCORES=8
 
-ENV BASE_DIR=${ARG_BASE_DIR}
-ENV POLYITE_ROOT=${BASE_DIR}/polyite
+ENV BASE_DIR=${ARG_BASE_DIR} \
+    POLYITE_ROOT=${ARG_BASE_DIR}/polyite
 ENV LLVM_ROOT=${BASE_DIR}/llvm_root \
     ISL_INSTALL=${BASE_DIR}/isl/install \
-    ISL_UTILS_ROOT=${POLYITE_DIR}/scala-isl-utils \
+    ISL_UTILS_ROOT=${POLYITE_ROOT}/scala-isl-utils \
     BARVINOK_INSTALL=${BASE_DIR}/barvinok/install \
     BARVINOK_BINARY_ROOT=${BASE_DIR}/barvinok_binary \
-    CHERNIKOVA_ROOT=${POLYITE_DIR}/chernikova
+    CHERNIKOVA_ROOT=${POLYITE_ROOT}/chernikova
 
 # for barvinok shared libs
 ENV LD_LIBRARY_PATH=${BARVINOK_INSTALL}/lib
