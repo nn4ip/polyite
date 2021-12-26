@@ -6,7 +6,7 @@ ARG ARG_BASE_DIR=/root/polyite-project \
     NCORES=8
 
 ENV BASE_DIR=${ARG_BASE_DIR}
-ENV	LLVM_ROOT=${BASE_DIR}/llvm_root \
+ENV LLVM_ROOT=${BASE_DIR}/llvm_root \
     ISL_INSTALL=${BASE_DIR}/isl/install \
     ISL_UTILS_ROOT=${BASE_DIR}/scala-isl-utils \
     BARVINOK_INSTALL=${BASE_DIR}/barvinok/install \
@@ -39,6 +39,9 @@ RUN mkdir ${BASE_DIR} \
     && make clean
 
 RUN cd $BASE_DIR \
+    && wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz \
+    && tar -xzf scala-2.11.6.tgz && rm scala-2.11.6.tgz \
+    && export SCALAC=${BASE_DIR}/scala-2.11.6/bin/scalac \
     && git clone https://github.com/stganser/isl.git \
     && cd isl \
     && mkdir $ISL_INSTALL \
