@@ -28,7 +28,7 @@ RUN	apt update \
 RUN mkdir ${BASE_DIR} \
     && cd $BASE_DIR \
     && git clone https://github.com/nn4ip/polyite.git \
-    && mkdir ${LLVM_ROOT} lib \
+    && mkdir ${LLVM_ROOT} \
     && cd ${LLVM_ROOT} \
     && git clone https://github.com/stganser/llvm.git \
     && cd ${LLVM_ROOT}/llvm/tools \
