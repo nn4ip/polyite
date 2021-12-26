@@ -1,6 +1,6 @@
 #!/bin/bash
 
-POLLY_INSTALL_DIR="set this to the correct path"
+POLLY_INSTALL_DIR="${LLVM_ROOT}/install"
 clang="${POLLY_INSTALL_DIR}/bin/clang"
 llc="${POLLY_INSTALL_DIR}/bin/llc"
 opt="${POLLY_INSTALL_DIR}/bin/opt"

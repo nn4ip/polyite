@@ -10,7 +10,7 @@
 #SBATCH -o polybench-baseline-measurement-%a.out
 #SBATCH -e polybench-baseline-measurement-%a.err
 
-POLLY_INSTALL_DIR=/scratch/ganser/polly
+POLLY_INSTALL_DIR="${LLVM_ROOT}/install"
 
 #opt="${POLLY_INSTALL_DIR}/bin/opt -load ${POLLY_INSTALL_DIR}/lib/LLVMPolly.so"
 opt="${POLLY_INSTALL_DIR}/bin/opt"

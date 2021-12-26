@@ -19,7 +19,7 @@ ENV LD_LIBRARY_PATH=${BARVINOK_INSTALL}/lib
 
 RUN	apt update \
     && apt install -y git cmake python clang libclang-dev llvm \
-    default-jdk autoconf libtool libgmp-dev libz-dev zip g++ wget \
+    default-jdk autoconf libtool libgmp-dev libz-dev zip g++ wget libpapi-dev \
     && git config --global url."https://github.com.cnpmjs.org/".insteadOf "https://github.com/"
 
 RUN mkdir ${BASE_DIR} \
@@ -55,7 +55,8 @@ RUN cd $BASE_DIR \
     && cd ${BASE_DIR}/scala-isl-utils \
     && mkdir libs \
     && cp ${BASE_DIR}/isl/interface/isl-scala.jar libs \
-    && cp ${ISL_INSTALL}/lib/libisl*so* libs
+    && cp ${ISL_INSTALL}/lib/libisl*so* libs \
+    && cp ${BASE_DIR}/scala-isl-utils/libs/isl-scala.jar ${POLYITE_ROOT}/libs/
 
 COPY libs/* ${POLYITE_ROOT}/libs/
 COPY *.tar.gz ${BASE_DIR}/
