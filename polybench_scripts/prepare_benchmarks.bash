@@ -6,7 +6,7 @@ llc="${POLLY_INSTALL_DIR}/bin/llc"
 opt="${POLLY_INSTALL_DIR}/bin/opt"
 llvm_link="${POLLY_INSTALL_DIR}/bin/llvm-link"
 polly="${POLLY_INSTALL_DIR}/bin/clang"
-POLYITE_LOC="set this to the correct path"
+POLYITE_LOC=${POLYITE_ROOT}
 
 pollyConfigurations="`pwd`/polly_configurations.txt"
 
