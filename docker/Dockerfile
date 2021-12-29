@@ -22,7 +22,7 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak \
     && sed -i 's/archive.ubuntu.com/mirrors.bfsu.edu.cn/g' /etc/apt/sources.list \
     && sed -i 's/security.ubuntu.com/mirrors.bfsu.edu.cn/g' /etc/apt/sources.list \
     && apt update \
-    && apt install -y git cmake python clang libclang-dev llvm \
+    && apt install -y git cmake python clang libclang-dev llvm vim \
     default-jdk autoconf libtool libgmp-dev libz-dev zip g++ wget libpapi-dev \
     && git config --global url."https://github.com.cnpmjs.org/".insteadOf "https://github.com/"
 
