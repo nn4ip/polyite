@@ -1,9 +1,9 @@
 FROM ubuntu:16.04
 SHELL ["/bin/bash", "-c"]
 
-ARG ARG_BASE_DIR=/root/polyite-project \
-    DEBIAN_FRONTEND=noninteractive \
-    NCORES=8
+ARG ARG_BASE_DIR=/root/polyite-project
+ARG DEBIAN_FRONTEND=noninteractive
+ARG NCORES=8
 
 ENV BASE_DIR=${ARG_BASE_DIR} \
     POLYITE_ROOT=${ARG_BASE_DIR}/polyite
