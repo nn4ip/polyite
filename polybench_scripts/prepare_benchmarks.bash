@@ -29,7 +29,7 @@ function getRegionList {
   regionsTmp=/tmp/regions_tmp
   for f in *jscop
   do
-    grep -P '\"name\" : \".* => .*\",' < ${f} | sed -r 's/\s+\"name\"\s:\s\"(.*)\s=>\s(.*)\",/%\1---%\2/g'
+    grep -P '\"name\" : \".*---.*\",' < ${f} | sed -r 's/\s+\"name\"\s:\s\"(.*)---(.*)\",/\1---\2/g'
   done > ${regionsTmp}
 }
 
