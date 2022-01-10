@@ -7,6 +7,8 @@ opt="${POLLY_INSTALL_DIR}/bin/opt"
 llvm_link="${POLLY_INSTALL_DIR}/bin/llvm-link"
 polly="${POLLY_INSTALL_DIR}/bin/clang"
 POLYITE_LOC=${POLYITE_ROOT}
+count_integer_points="${BARVINOK_BINARY_ROOT}/count_integer_points"
+BARVINOK_LIBRARY_DIR="${BARVINOK_INSTALL}/lib"
 
 pollyConfigurations="`pwd`/polly_configurations.txt"
 
@@ -135,8 +137,8 @@ function writeGAConfig {
     echo "schedTreeSimplDivideCoeffsByGCD=true" >> ${output}
     echo "schedTreeSimplElimSuperfluousSubTrees=true" >> ${output}
     echo "schedTreeSimplElimSuperfluousDimNodes=true" >> ${output}
-    echo "barvinokBinary=${HOME}/workspace/count_integer_points/count_integer_points" >> ${output}
-    echo "barvinokLibraryPath=${HOME}/workspace/barvinok/barvinok/install/lib" >> ${output}
+    echo "barvinokBinary=${count_integer_points}" >> ${output}
+    echo "barvinokLibraryPath=${BARVINOK_LIBRARY_DIR}" >> ${output}
     echo "normalizeFeatures=true" >> ${output}
     echo "evaluationStrategy=CPU" >> ${output}
     echo "learningSet=" >> ${output}
@@ -203,8 +205,8 @@ function writeRandExpConf {
     echo "filterImportedPopulation=false" >> ${output}
     echo "importScheds=false" >> ${output}
     echo "islComputeout=38400000" >> ${output}
-    echo "barvinokBinary=${HOME}/workspace/count_integer_points/count_integer_points" >> ${output}
-    echo "barvinokLibraryPath=${HOME}/workspace/barvinok/barvinok/install/lib" >> ${output}
+    echo "barvinokBinary=${count_integer_points}" >> ${output}
+    echo "barvinokLibraryPath=${BARVINOK_LIBRARY_DIR}" >> ${output}
     echo "paramValMappings=${paramValMappings}" >> ${output}
     echo "measureParExecTime=true" >> ${output}
     echo "measureSeqExecTime=false" >> ${output}
