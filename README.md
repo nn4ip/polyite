@@ -1,5 +1,7 @@
 # Polyite: Iterative Schedule Optimization for Parallelization in the Polyhedron Model
 
+> Note for Docker: to use numactl, use `docker run --privileged` to give sufficient privileges for set_mempolicy and setting membind.
+
 ## Description
   Polyite is a tool that iteratively optimizes the schedule of a program that is
   representable in the [Polyhedron Model](http://polyhedral.info) in order to

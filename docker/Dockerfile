@@ -24,6 +24,7 @@ RUN cp /etc/apt/sources.list /etc/apt/sources.list.bak \
     && apt update \
     && apt install -y git cmake python clang libclang-dev llvm vim \
     default-jdk autoconf libtool libgmp-dev libz-dev zip g++ wget libpapi-dev \
+    numactl \
     && git config --global url."https://github.com.cnpmjs.org/".insteadOf "https://github.com/"
 
 # build polly with llvm 3.9.1
