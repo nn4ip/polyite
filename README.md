@@ -23,6 +23,8 @@
   released under MIT license. libbarvinok is GPL licensed.
 
 ## Installation and Setup
+  The following installation steps have been tested on Ubuntu 18.04.
+
   We start from the bottom up with the dependences of Polyite and install
   everything inside the same directory, which could be your IDE's workspace.
 
@@ -30,14 +32,33 @@
   4.1](http://web.cse.ohio-state.edu/~pouchet.2/software/polybench/) benchmark
   suite.
 
+### Begin
+
+  The following are some environments variables that are needed both at compile-time and run-time. You may need to add them to somewhere like `~/.bashrc` to make them available across sessions - which is required for the measurement and preparation scripts to run correctly. Otherwise you'll need to modify the corresponding variables in `measure_polybench.sh`, `polybench_scripts/*`.
+
   ```bash
   export BASE_DIR=$PWD
+  export POLYITE_ROOT=${BASE_DIR}/polyite
+  export LLVM_ROOT=${BASE_DIR}/llvm_root
+  export LLVM381=${BASE_DIR}/llvm-3.8.1
+  export ISL_INSTALL=${BASE_DIR}/isl/install
+  export ISL_UTILS_ROOT=${POLYITE_ROOT}/scala-isl-utils
+  export BARVINOK_INSTALL=${BASE_DIR}/barvinok/install
+  export BARVINOK_BINARY_ROOT=${BASE_DIR}/barvinok_binary
+  export CHERNIKOVA_ROOT=${POLYITE_ROOT}/chernikova
+
+  export LD_LIBRARY_PATH=${BARVINOK_INSTALL}/lib:${LD_LIBRARY_PATH}
+  ```
+
+  ```bash
+  cd ${BASE_DIR}
+  git clone https://github.com/stganser/polyite.git
   ```
 
 ### Polly/LLVM
   Polyite uses an extended version of Polly (we provide a version of 3.9.1 and
   the older version of January, 2016 that we refer to in our publications) that
-  is  capable of importing schedule trees from our extended JSCOP format and
+  is capable of importing schedule trees from our extended JSCOP format and
   further transforming the imported schedules, for instance by tiling them.
   Therefore, you must clone LLVM, Clang and Polly from our specially provided
   repositories.
@@ -45,7 +66,6 @@
   1. Create a root directory for LLVM
   ```bash
   mkdir llvm_root
-  export LLVM_ROOT="${BASE_DIR}/llvm_root"
   ```
 
   2. Clone LLVM
@@ -67,38 +87,75 @@
   ```
 
   5. Create a build directory for LLVM and build it using cmake
+
+  It is best to use a GCC with version before 7, otherwise there may be compilation errors like "undeclared std::function". On Ubuntu 18.04, you can install by running `sudo apt install gcc-6 g++-6`.
+
   ```bash
   mkdir ${LLVM_ROOT}/llvm_build
   mkdir ${LLVM_ROOT}/install
   cd ${LLVM_ROOT}/llvm_build
-  export CC=gcc-5
-  export CXX=g++-5
-  cmake ${LLVM_ROOT}/llvm
+  export CC=gcc-6
+  export CXX=g++-6
+  cmake ${LLVM_ROOT}/llvm -DCMAKE_INSTALL_PREFIX=${LLVM_ROOT}/install
   make
+  make install
   ```
-  It is best to use a GCC with version before 7, otherwise there may be compilation errors like "undeclared std::function".
+  
 
 ### LLVM 3.8 for Building isl
-  You may need to use LLVM 3.8 (default in Ubuntu 16.04) for building isl.
+  You may need to use LLVM 3.8 for building this version of isl.
+
+  ```bash
+  cd ${BASE_DIR}
+  wget https://releases.llvm.org/3.8.1/llvm-3.8.1.src.tar.xz
+  tar -xf llvm-3.8.1.src.tar.xz
+  rm llvm-3.8.1.src.tar.xz
+  mv llvm-3.8.1.src $LLVM381
+  cd $LLVM381/tools
+  wget https://releases.llvm.org/3.8.1/cfe-3.8.1.src.tar.xz
+  tar -xf cfe-3.8.1.src.tar.xz
+  rm cfe-3.8.1.src.tar.xz
+  mv cfe-3.8.1.src clang
+  cd ..
+  mkdir build install
+  cd build
+  cmake -G Ninja -DCMAKE_INSTALL_PREFIX="${LLVM381}/install" ..
+  cmake --build . --target install
+  cmake --build . --target clean
+  ```
 
 ### isl Scala Bindings
-  1. Make sure you have libgmp and libclang (version 3.8) (both including headers) installed on your system, as well as libtool
+  1. Make sure you have libgmp and libclang (version 3.8) (both including headers) installed on your system, as well as libtool.
 
-  2. Get and build isl
-  
-  In the case of missing jni.h in Ubuntu, try `apt install default-jdk`.
+  2. Get JDK 8
+  ```bash
+  sudo apt install openjdk-8-jdk
+  ```
+  You may need to manually select Java 8 as default if you have other versions installed.
+  ```bash
+  sudo update-alternatives --config java
+  ```
+
+  2. Get Scala 2.11.6
+  ```bash
+  cd ${BASE_DIR}
+  wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz
+  tar -xzf scala-2.11.6.tgz && rm scala-2.11.6.tgz
+  export SCALAC=${BASE_DIR}/scala-2.11.6/bin/scalac
+  ```
+
+  3. Get and build isl
   ```bash
   cd ${BASE_DIR}
   git clone https://github.com/stganser/isl.git
   cd isl
   mkdir install
-  export ISL_INSTALL="${PWD}/install"
   ./autogen.sh
-  ./configure --prefix=${ISL_INSTALL} --with-jni-include=/usr/lib/jvm/default-java/include/ --with-clang-prefix="${LLVM_ROOT}/install/"
+  ./configure --prefix=${ISL_INSTALL} --with-jni-include=/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ --with-clang-prefix="${LLVM381}/install/"
   make install
   ```
 
-  3. Generate the bindings
+  4. Generate the bindings
   ```bash
   cd ${BASE_DIR}/isl/interface
   make isl-scala.jar
@@ -114,10 +171,9 @@
 
   1. Clone the repository:
   ```bash
-  cd ${BASE_DIR}
+  cd ${POLYITE_ROOT}
   git clone https://github.com/stganser/scala-isl-utils.git
-  cd ${BASE_DIR}/scala-isl-utils
-  export ISL_UTILS_ROOT=${BASE_DIR}/scala-isl-utils
+  cd ${ISL_UTILS_ROOT}
   mkdir lib
   cp ${BASE_DIR}/isl/interface/isl-scala.jar lib
   cp ${ISL_INSTALL}/lib/libisl*so* lib
@@ -129,20 +185,38 @@
   bindings for libbarvinok, Polyite calls a small C-binary when it needs to
   determine a polyhedron's volume.
 
-  1. Clone the repositories:
+  1. Install barvinok
   ```bash
   cd ${BASE_DIR}
   git clone http://repo.or.cz/barvinok.git
   cd barvinok
   git checkout barvinok-0.39
-  export BARVINOK_INSTALL=barvinok/install
+  git submodule init && git submodule update
+  wget https://libntl.org/ntl-10.5.0.tar.gz
+  tar -xzf ntl-10.5.0.tar.gz && rm ntl-10.5.0.tar.gz
+  cd ntl-10.5.0 && mkdir install
+  cd src
+  ./configure NTL_GMP_LIP=on PREFIX=${BASE_DIR}/barvinok/ntl-10.5.0/install GMP_PREFIX=/usr/lib/x86_64-linux-gnu SHARED=on
+  make
+  make install
+
+  cd ${BASE_DIR}/barvinok
+  mkdir install
+  sh autogen.sh
+  ./configure --prefix=${BARVINOK_INSTALL} --with-ntl-prefix=${BASE_DIR}/barvinok/ntl-10.5.0/install --with-gmp-prefix=/usr/lib/x86_64-linux-gnu --enable-shared-barvinok
+  make
+  make install
+  ```
+
+  2. Build the binary wrapper
+  ```bash
   cd ${BASE_DIR}
   git clone https://github.com/stganser/barvinok_binary.git
+  cd barvinok_binary
+  clang -std=c99 -I${BARVINOK_INSTALL}/include -L${BARVINOK_INSTALL}/lib count_integer_points.c -lbarvinok -lisl -o count_integer_points
   export BARVINOK_BINARY_ROOT=${BASE_DIR}/barvinok_binary
   ```
 
-  2. Follow the projects' build instructions and make sure that you install
-    libbarvinok to `${BASE_DIR}/barvinok/install`.
 
 ### Chernikova
   This Scala library provides an implementation of Chernikova's algorithm to
@@ -150,46 +224,63 @@
   of polyhedra.
 
   ```bash
-  cd ${BASE_DIR}
+  cd ${POLYITE_ROOT}
   git clone https://github.com/stganser/chernikova.git
-  export CHERNIKOVA_ROOT=${BASE_DIR}/chernikova
   ```
 
-### Polyite
-  The following steps describe how obtain Polyite itself and put everything
-  together to run benchmarks from Polybench 4.1. Since we do not provide the
-  configuration for a build tool, such as sbt, the easiest way to build Polyite
-  is probably by using [Scala IDE](http://scala-ide.org/).
-
-  1. Get the code:
+### OpenMPI
+  Build OpenMPI with Java interface.
   ```bash
   cd ${BASE_DIR}
-  git clone https://github.com/stganser/polyite.git
-  export POLYITE_ROOT=${BASE_DIR}/polyite
+  wget -O - https://download.open-mpi.org/release/open-mpi/v2.1/openmpi-2.1.1.tar.gz | tar -xz
+  cd openmpi-2.1.1
+  mkdir install
+  ./configure --prefix=${BASE_DIR}/openmpi-2.1.1/install --enable-mpi-java
+  make all
+  make install
+  mkdir -p ${BASE_DIR}/polyite/lib
+  cp ${BASE_DIR}/openmpi-2.1.1/install/lib/mpi.jar ${BASE_DIR}/polyite/lib/
   ```
-  2. Download required libraries
+
+### Compile Scala package
+
+  1. Reorganize directory structure for sbt
+  ```bash
+  cd ${ISL_UTILS_ROOT}
+  mkdir -p src/main/scala
+  mv src/isl/ src/main/scala/
+  cd ${CHERNIKOVA_ROOT}
+  mkdir -p src/main/scala
+  mv src/org/ src/main/scala/
+  ```
+
+  2. Install sbt and compile
+  ```bash
+  echo "deb https://repo.scala-sbt.org/scalasbt/debian all main" | sudo tee /etc/apt/sources.list.d/sbt.list
+  echo "deb https://repo.scala-sbt.org/scalasbt/debian /" | sudo tee /etc/apt/sources.list.d/sbt_old.list
+  curl -sL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x2EE0EA64E40A89B84B2DF73499E82A75642AC823" | sudo -H gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/scalasbt-release.gpg --import
+  sudo chmod 644 /etc/apt/trusted.gpg.d/scalasbt-release.gpg
+  sudo apt update
+  sudo apt install sbt
+  ```
+
   ```bash
   cd ${POLYITE_ROOT}
-  mkdir lib
+  cp docker/lib/* lib/
+  sbt package
   ```
-  Now, download Scala 2.11.6 from
-  [http://www.scala-lang.org/download/2.11.6.html](http://www.scala-lang.org/download/2.11.6.html)
-  and copy `scala-2.11.6/lib/scala-library.jar` and
-  `scala-2.11.6/lib/scala-parser-combinators_2.11-1.0.3.jar` to
-  `${POLYITE_ROOT}/lib` Further, one must download [Apache Commons Lang version
-  3.4](https://archive.apache.org/dist/commons/lang/binaries/) and [Apache
-  Commons Math version 3.6.1](https://archive.apache.org/dist/commons/math/binaries/).
-  Again, copy the downloaded JAR-files to `${POLYITE_ROOT}/lib`.
 
-  Polyite relies on [OpenMPI](https://www.open-mpi.org/) for its distributed
-  genetic algorithm. To be able to build Polyite, Java bindings for OpenMPI
-  must be in Polyites classpath. Follow the instructions on
-  [https://www.open-mpi.org/faq/?category=java#java_build](https://www.open-mpi.org/faq/?category=java#java_build) to build the bindings. Copy the file
-  `mpi.jar` to `${POLYITE_ROOT}/lib`. Polyite works with OpenMPI version 2.1.1.
 
-  3. Import the projects polyite and scala-isl-utils in Scala IDE/ Eclipse and build everything. Make sure that the libraries in `${POLYITE_ROOT}/lib` are in your build path, as well as `${ISL_UTILS_ROOT}/lib/isl-scala.jar`. Make sure, that your Scala compiler assumes Scala version 2.11. Make chernikova and scala-isl-utils depend on the downloaded Scala version as well and make chernikova depend on scala-isl-utils.
+### Polyite
+  The following steps describe how to put everything
+  together to run benchmarks from Polybench 4.1.
 
-  4. To use Polyite, one must execute one of the following scripts, depending on
+  0. Some prerequisites to install:
+  ```bash
+  sudo apt install numactl libz-dev libpapi-dev
+  ```
+
+  1. To use Polyite, one must execute one of the following scripts, depending on
     the desired execution mode. The scripts assume that you have OpenJDK 8
     installed in `/usr/lib/jvm/java-1.8.0-openjdk-amd64/` (the default location
     on Debian based systems).
@@ -206,11 +297,11 @@
     * `POLYITE_LOC` to the value of `${POLYITE_ROOT}`
     * `CHERNIKOVA_LOC` to the value of `${CHERNIKOVA_ROOT}`
 
-  5. To compile and execute a schedule in order to determine its profitability,
+  2. To compile and execute a schedule in order to determine its profitability,
     Polyite starts the script `measure_polybench.bash`. At the top of script,
     set `POLLY_INSTALL_DIR` to the value of `${LLVM_ROOT}/llvm_build`.
 
-  6. The scripts in `${POLYITE_ROOT}/polybench_scripts/` are used to prepare
+  3. The scripts in `${POLYITE_ROOT}/polybench_scripts/` are used to prepare
     Polybench 4.1 benchmarks for optimization with Polyite. They generate
     prepared LLVM-IR code, execute baseline measurements, compute reference
     output and generate configuration files for random exploration or
@@ -229,9 +320,14 @@
 
     Install `libpapi` version 5.4.3.
 
-  7. Download [Polybench 4.1](https://sourceforge.net/projects/polybench/files/polybench-c-4.1.tar.gz/download) and unpack the archive to `${POLYITE_ROOT}/polybench-c-4.1`.
+  4. Download [Polybench 4.1](https://sourceforge.net/projects/polybench/files/polybench-c-4.1.tar.gz/download) and unpack the archive to `${POLYITE_ROOT}/polybench-c-4.1`.
 
-  8. Create symbolic links in `polybench-c-4.1`:
+  ```bash
+  cd ${POLYITE_ROOT}
+  cat docker/polybench-c-4.1.tar.gz | tar -xz
+  ```
+
+  5. Create symbolic links in `polybench-c-4.1`:
   ```bash
   cd ${POLYITE_ROOT}/polybench-c-4.1
   ln -s ../polybench_scripts/baselineCollectData.bash baselineCollectData.bash
