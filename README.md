@@ -119,6 +119,7 @@
   cd ..
   mkdir build install
   cd build
+  # Use Unix Makefiles if you don't have Ninja
   cmake -G Ninja -DCMAKE_INSTALL_PREFIX="${LLVM381}/install" ..
   cmake --build . --target install
   cmake --build . --target clean
@@ -136,7 +137,7 @@
   sudo update-alternatives --config java
   ```
 
-  2. Get Scala 2.11.6
+  3. Get Scala 2.11.6
   ```bash
   cd ${BASE_DIR}
   wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz
@@ -144,7 +145,7 @@
   export SCALAC=${BASE_DIR}/scala-2.11.6/bin/scalac
   ```
 
-  3. Get and build isl
+  4. Get and build isl
   ```bash
   cd ${BASE_DIR}
   git clone https://github.com/stganser/isl.git
@@ -155,7 +156,7 @@
   make install
   ```
 
-  4. Generate the bindings
+  5. Generate the bindings
   ```bash
   cd ${BASE_DIR}/isl/interface
   make isl-scala.jar
