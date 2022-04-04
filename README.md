@@ -137,12 +137,11 @@
   sudo update-alternatives --config java
   ```
 
-  3. Get Scala 2.11.6
+  3. Get Scala 2.12.15
   ```bash
   cd ${BASE_DIR}
-  wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz
-  tar -xzf scala-2.11.6.tgz && rm scala-2.11.6.tgz
-  export SCALAC=${BASE_DIR}/scala-2.11.6/bin/scalac
+  wget -O - https://downloads.lightbend.com/scala/2.12.15/scala-2.12.15.tgz | tar -xz
+  export SCALAC=${BASE_DIR}/scala-2.12.15/bin/scalac
   ```
 
   4. Get and build isl
@@ -153,6 +152,7 @@
   mkdir install
   ./autogen.sh
   ./configure --prefix=${ISL_INSTALL} --with-jni-include=/usr/lib/jvm/java-1.8.0-openjdk-amd64/include/ --with-clang-prefix="${LLVM381}/install/"
+  make
   make install
   ```
 
@@ -167,10 +167,8 @@
   The last three steps include the source code of the bindings into the
   generated library.
 
-### Wrapper for the isl Scala Bindings
+  6. Wrapper for the isl Scala Bindings
   This subproject makes the isl Scala bindings accessible to Polyite.
-
-  1. Clone the repository:
   ```bash
   cd ${POLYITE_ROOT}
   git clone https://github.com/stganser/scala-isl-utils.git
@@ -268,6 +266,8 @@
   ```bash
   cd ${POLYITE_ROOT}
   cp docker/lib/* lib/
+  cp ${BASE_DIR}/scala-2.12.15/lib/scala-library.jar lib/
+  cp ${BASE_DIR}/scala-2.12.15/lib/scala-parser-combinators_2.12-1.0.7.jar lib/
   sbt package
   ```
 

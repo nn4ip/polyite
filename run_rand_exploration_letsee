@@ -2,4 +2,4 @@
 ISL_UTILS_LOC=${ISL_UTILS_ROOT}
 POLYITE_LOC=${POLYITE_ROOT}
 CHERNIKOVA_LOC=${CHERNIKOVA_ROOT}
-LD_PRELOAD=${ISL_UTILS_LOC}/lib/libisl.so.15.0.0 /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java -XX:+UseG1GC -Djava.library.path=${ISL_UTILS_LOC}/lib -classpath ${POLYITE_LOC}/target/scala-2.11/polyite_2.11-0.1.0-SNAPSHOT.jar:${ISL_UTILS_LOC}/target/scala-2.11/isl_2.11-0.1.0-SNAPSHOT.jar:${CHERNIKOVA_LOC}/target/scala-2.11/chernikova_2.11-0.1.0-SNAPSHOT.jar:${POLYITE_LOC}/lib/scala-library.jar:${ISL_UTILS_LOC}/lib/isl-scala.jar:${POLYITE_LOC}/lib/scala-parser-combinators_2.11-1.0.3.jar polyite.MainRandSchedsLeTSeE $@
+LD_PRELOAD=${ISL_UTILS_LOC}/lib/libisl.so.15.0.0 /usr/lib/jvm/java-1.8.0-openjdk-amd64/bin/java -XX:+UseG1GC -Djava.library.path=${ISL_UTILS_LOC}/lib -classpath ${POLYITE_LOC}/target/scala-2.12/polyite_2.12-0.1.0-SNAPSHOT.jar:${ISL_UTILS_LOC}/target/scala-2.12/isl_2.12-0.1.0-SNAPSHOT.jar:${CHERNIKOVA_LOC}/target/scala-2.12/chernikova_2.12-0.1.0-SNAPSHOT.jar:${POLYITE_LOC}/lib/scala-library.jar:${ISL_UTILS_LOC}/lib/isl-scala.jar:${POLYITE_LOC}/lib/scala-parser-combinators_2.12-1.0.7.jar polyite.MainRandSchedsLeTSeE $@

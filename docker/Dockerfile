@@ -46,9 +46,8 @@ RUN mkdir ${BASE_DIR} \
 
 # isl scala bindings
 RUN cd $BASE_DIR \
-    && wget https://downloads.lightbend.com/scala/2.11.6/scala-2.11.6.tgz \
-    && tar -xzf scala-2.11.6.tgz && rm scala-2.11.6.tgz \
-    && export SCALAC=${BASE_DIR}/scala-2.11.6/bin/scalac \
+    && wget -O - https://downloads.lightbend.com/scala/2.12.15/scala-2.12.15.tgz | tar -xz \
+    && export SCALAC=${BASE_DIR}/scala-2.12.15/bin/scalac \
     && git clone https://github.com/stganser/isl.git \
     && cd isl \
     && mkdir $ISL_INSTALL \
@@ -65,7 +64,9 @@ RUN cd $BASE_DIR \
     && cd ${ISL_UTILS_ROOT} \
     && mkdir lib \
     && cp ${BASE_DIR}/isl/interface/isl-scala.jar lib \
-    && cp ${ISL_INSTALL}/lib/libisl*so* lib
+    && cp ${ISL_INSTALL}/lib/libisl*so* lib \
+    && cp ${BASE_DIR}/scala-2.12.15/lib/scala-library.jar lib/ \
+    && cp ${BASE_DIR}/scala-2.12.15/lib/scala-parser-combinators_2.12-1.0.7.jar lib/
 
 COPY lib/* ${POLYITE_ROOT}/lib/
 COPY *.tar.gz ${BASE_DIR}/

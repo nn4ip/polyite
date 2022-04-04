@@ -1,4 +1,4 @@
-ThisBuild / scalaVersion	:= "2.11.6"
+ThisBuild / scalaVersion	:= "2.12.15"
 
 lazy val polyite = (project in file("."))
   .dependsOn(isl, chernikova)
