@@ -1,6 +1,6 @@
 #!/bin/bash
 #POLLY_INSTALL_DIR=/scratch/ganser/polly
-POLLY_INSTALL_DIR="${LLVM_ROOT}/install"
+POLLY_INSTALL_DIR="${LLVM_ROOT}/build"
 opt="${POLLY_INSTALL_DIR}/bin/opt"
 polly="${POLLY_INSTALL_DIR}/bin/clang"
 llc="${POLLY_INSTALL_DIR}/bin/llc"

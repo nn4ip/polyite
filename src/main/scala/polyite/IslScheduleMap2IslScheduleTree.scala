@@ -1,9 +1,27 @@
 package polyite
 
+import polyite.export.JSCOPInterface
+import java.util.logging.Logger
+import polyite.config.ConfigRand
+import java.util.logging.Level
+import polyite.config.Config
+import polyite.config.MinimalConfig.NumGeneratorsLimit
+import polyite.config.MinimalConfig.NumGeneratorsLimit
+import polyite.schedule.sampling.SamplingStrategy
+import polyite.schedule.schedule_tree.ScheduleTreeConstruction
+import polyite.schedule.hash.ScheduleHash
+import polyite.schedule.Dependence
+import polyite.schedule.DomainCoeffInfo
+import polyite.schedule.ScheduleSpaceUtils
+
+import scala.util.parsing.json.JSON
+import java.util.Base64
+import java.nio.charset.StandardCharsets
 import polyite.config.Config
 import java.util.Properties
 
-class AbstractTest {
+
+object IslScheduleMap2IslScheduleTree {
   protected def createTestConfig() : Option[Config] = {
     val props : Properties = new Properties()
     props.setProperty("numMeasurementThreads", "1")
@@ -75,5 +93,43 @@ class AbstractTest {
     props.setProperty("scheduleEquivalenceRelation", "RATIONAL_MATRIX_AND_GENERATORS")
     props.setProperty("expectPrevectorization", "false")
     return Config.parseConfig(props)
+  }
+  
+  
+  val myLogger : Logger = Logger.getLogger("")
+
+  def main(args : Array[String]) : Unit = {
+    val scopStr = new String(Base64.getDecoder().decode(args(0)))    
+    val schedStr = new String(Base64.getDecoder().decode(args(1)))
+//    println(scopStr)
+//    println(schedStr)
+
+    val ctx : isl.Ctx = isl.Isl.ctx
+    val sched : isl.UnionMap = isl.UnionMap.readFromStr(ctx, schedStr)
+
+    
+       
+    var scop : ScopInfo = null
+    var deps : Set[Dependence] = null
+    var domInfo : DomainCoeffInfo = null
+    var conf : Config = null
+
+    scop = JSCOPInterface.parseJSCOP(scopStr) match {
+      case None    => throw new RuntimeException()
+      case Some(s) => s
+    }
+    
+    val t : (Set[Dependence], DomainCoeffInfo) = ScheduleSpaceUtils.calcDepsAndDomInfo(scop)
+    deps = t._1
+    domInfo = t._2
+
+    conf = createTestConfig() match {
+      case None    => throw new RuntimeException()
+      case Some(c) => c
+    }    
+    
+    val schedTree : isl.Schedule = ScheduleTreeConstruction.islUnionMap2IslScheduleTree(sched, domInfo, scop, deps, conf)
+    
+    println(schedTree.toString())
   }
 }
