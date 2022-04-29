@@ -2,12 +2,8 @@
 
 # defines
 AKG_TESTS_DIR=/home/fan/repos/akg/tests
-AKG_POLY_IR_DIR="${AKG_TESTS_DIR}/dev/autorun/tensorcore_conv_auto_float16_16_4_4_16_float16_16_3_3_16_1_1_0_0_0_0_1_1_float16_0/poly"
+AKG_POLY_IR_DIR="./conv_auto_float32_32_64_56_56_float32_64_64_3_3_1_1_1_1_1_1_1_1_0/poly"
 
-POLLY_INSTALL_DIR="${LLVM_ROOT}/install"
-opt="${POLLY_INSTALL_DIR}/bin/opt"
-polly="${POLLY_INSTALL_DIR}/bin/clang"
-llc="${POLLY_INSTALL_DIR}/bin/llc"
 
 # utility functions
 function printerr {
@@ -203,8 +199,10 @@ trap _trap SIGINT SIGTERM
 
 
 # initial compile
-source ${AKG_TESTS_DIR}/test_env.sh gpu
-python ${AKG_TESTS_DIR}/dev/dev_run.py
+source /home/fan/miniconda3/bin/activate
+conda activate akg
+source ${AKG_TESTS_DIR}/test_env.sh gpu 1> /dev/null
+python ${AKG_TESTS_DIR}/dev/dev_run.py 1> init.log 2>&1
 
 
 # get jscop from stdin and print to file
@@ -212,31 +210,28 @@ kernelFuncName=`echo ${benchmarkName} | sed 's/-/_/g'`
 region="%${scopRegionStart}---%${scopRegionEnd}"
 jscopFile="kernel_${kernelFuncName}___${region}.jscop"
 
-echo "" > ComputeSchedule.txt
+echo "" > ${jscopFile}
 while read line
 do
-    # echo ${line} >> ${jscopFile}
-    echo ${line} >> ComputeSchedule.txt
+    echo ${line} >> ${jscopFile}
+    # echo ${line} >> ComputeSchedule.txt
 done
+grep -w "\"schedTree\" : " ${jscopFile} | \
+  sed -e 's/\"schedTree\" : \"//' -e 's/\"$//' -e 's/\\\"/\"/g' > ${AKG_POLY_IR_DIR}/AnalyzeSchedule.txt
 
 
-# call akg to compile using new schedule
-python ${AKG_TESTS_DIR}/dev/dev_run.py
-
-
-
-# is the schedule valid?
+# validation run: is the schedule valid?
 echo 'true'
 
-# measure parallel execution time
+
+# measure compilation times using new schedule
 unset parCompileDurations
 for ((i = 0; i < numCompilatonDurationMeasurements; ++i))
 do
-    parCompileDurations[${i}]="0"
+    parCompileDurations[${i}]=0
 done
 echo 'true'
 
-# measurement data
 if [ ${measureParExecTime} == "true" ]
 then
     echo parCompileDurations[*]
@@ -245,11 +240,19 @@ fi
 if [ ${measureParExecTime} == "true" ] && [ ${validateOutputEnabled} == "true" ]
 then
     # was the run successful?
-    echo 'true'
+    python ${AKG_TESTS_DIR}/dev/dev_run.py 1> test.log 2>&1
+    if grep -q 'Test Pass' test.log
+    then
+        echo 'true'
+    else
+        echo 'false'
+    fi
+    
     # did the outputs match?
     echo 'true'
 fi
 
+# measure execution times
 if [ ${measureParExecTime} == "true" ]
 then
     # was the run successful?
@@ -259,10 +262,15 @@ then
     local t
     for((i = 0; i < numExecutionTimeMeasurements; ++i))
     do
-        t[${i}]="0.${i}"
+        python ${AKG_TESTS_DIR}/dev/dev_run.py 1> ${i}.log 2>&1
+        t[${i}]=`grep 'mod_launch' ${i}.log | sed 's/^.*running:\(.*\) seconds$/\1/'`
     done
     echo ${t[*]}
 fi
 
+# copy all results out
+resultsDir=`date +%m%d-%H%M%S-%N`
+mkdir -p /home/fan/results/${resultsDir}
+cp -r * /home/fan/results/${resultsDir}/
 
 cleanupAndExit 0
