@@ -3,3 +3,9 @@
 .cache-tests
 tags
 /target/
+
+# copied from elsewhere
+/lib/
+# /polybench-c-4.1/
+# sbt build files
+/project/
